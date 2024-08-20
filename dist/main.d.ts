@@ -1,7 +1,7 @@
-import 'regenerator-runtime/runtime.js';
-import { Common } from './common';
-import { IAccessibility, IAccessibilityOptions, ISessionState, IStateValues } from './interfaces/accessibility.interface';
-import { IMenuInterface } from './interfaces/menu.interface';
+import "regenerator-runtime/runtime.js";
+import { Common } from "./common";
+import { IAccessibility, IAccessibilityOptions, ISessionState, IStateValues } from "./interfaces/accessibility.interface";
+import { IMenuInterface } from "./interfaces/menu.interface";
 export declare class Accessibility implements IAccessibility {
     static CSS_CLASS_NAME: string;
     static MENU_WIDTH: string;

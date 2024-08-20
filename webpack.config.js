@@ -5,13 +5,13 @@ const ROOT = path.resolve(__dirname, 'src');
 const DESTINATION = path.resolve(__dirname, 'dist');
 
 module.exports = {
-    mode: 'production',
+    mode: 'development',
     context: ROOT,
 
     entry: {
         'main': './accessibility.ts'
     },
-    
+
     output: {
         filename: '[name].bundle.js',
         libraryTarget: 'umd',
@@ -49,7 +49,7 @@ module.exports = {
             *****************/
             {
                 test: /\.ts$/,
-                exclude: [ /node_modules/ ],
+                exclude: [/node_modules/],
                 use: 'ts-loader'
             }
         ]
