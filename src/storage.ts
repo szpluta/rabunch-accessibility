@@ -4,15 +4,15 @@ export class Storage {
   constructor() {}
 
   has(key: string) {
-    return globalThis.localStorage.hasOwnProperty(key);
+    return window.localStorage.hasOwnProperty(key);
   }
 
   set(key: string, value: any) {
-    globalThis.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, JSON.stringify(value));
   }
 
   get(key: string) {
-    let item = globalThis.localStorage.getItem(key);
+    let item = window.localStorage.getItem(key);
     try {
       return JSON.parse(item);
     } catch (e) {
@@ -21,11 +21,11 @@ export class Storage {
   }
 
   clear() {
-    globalThis.localStorage.clear();
+    window.localStorage.clear();
   }
 
   remove(key: string) {
-    globalThis.localStorage.removeItem(key);
+    window.localStorage.removeItem(key);
   }
 
   isSupported() {

@@ -1132,9 +1132,9 @@ class Accessibility {
             });
         }
         if (this.options.modules.speechToText) {
-            globalThis.addEventListener("beforeunload", () => {
+            window.addEventListener("beforeunload", () => {
                 if (this._isReading) {
-                    globalThis.speechSynthesis.cancel();
+                    window.speechSynthesis.cancel();
                     this._isReading = false;
                 }
             });
@@ -1328,14 +1328,13 @@ class Accessibility {
         });
     }
     disabledUnsupportedFeatures() {
-        if (!("webkitSpeechRecognition" in globalThis) ||
+        if (!("webkitSpeechRecognition" in window) ||
             location.protocol !== "https:") {
             this._common.warn("speech to text isn't supported in this browser or in http protocol (https required)");
             this.options.modules.speechToText = false;
         }
-        const globalThisAny = globalThis;
-        if (!globalThisAny.SpeechSynthesisUtterance ||
-            !globalThisAny.speechSynthesis) {
+        const windowAny = window;
+        if (!windowAny.SpeechSynthesisUtterance || !windowAny.speechSynthesis) {
             this._common.warn("text to speech isn't supported in this browser");
             this.options.modules.textToSpeech = false;
         }
@@ -2155,7 +2154,7 @@ class Accessibility {
         let closeBtn = document.querySelector("._access-menu ._menu-close-btn");
         ["click", "keyup"].forEach((evt) => {
             closeBtn.addEventListener(evt, (e) => {
-                let et = e || globalThis.event;
+                let et = e || window.event;
                 if (et.detail === 0 &&
                     et.key !== "Enter")
                     return;
@@ -2165,7 +2164,7 @@ class Accessibility {
         let resetBtn = document.querySelector("._access-menu ._menu-reset-btn");
         ["click", "keyup"].forEach((evt) => {
             resetBtn.addEventListener(evt, (e) => {
-                let et = e || globalThis.event;
+                let et = e || window.event;
                 if (et.detail === 0 &&
                     et.key !== "Enter")
                     return;
@@ -2176,7 +2175,7 @@ class Accessibility {
     }
     getVoices() {
         return new Promise((resolve) => {
-            let synth = globalThis.speechSynthesis;
+            let synth = window.speechSynthesis;
             let id;
             id = setInterval(() => {
                 if (synth.getVoices().length !== 0) {
@@ -2275,7 +2274,7 @@ class Accessibility {
         let step3 = document.getElementsByClassName("screen-reader-wrapper-step-3");
         for (let i = 0; i < lis.length; i++) {
             ["click", "keyup"].forEach((evt) => lis[i].addEventListener(evt, (e) => {
-                let evt = e || globalThis.event;
+                let evt = e || window.event;
                 if (evt.detail === 0 &&
                     evt.key !== "Enter")
                     return;
@@ -2283,7 +2282,7 @@ class Accessibility {
             }));
         }
         [...Array.from(step1), ...Array.from(step2), ...Array.from(step3)].forEach((el) => el.addEventListener("click", (e) => {
-            let evt = e || globalThis.event;
+            let evt = e || window.event;
             this.invoke(evt.target.parentElement.parentElement.getAttribute("data-access-action"), evt.target);
         }, false));
     }
@@ -2510,10 +2509,9 @@ class Accessibility {
         }
     }
     speechToText() {
-        if ("webkitSpeechRecognition" in globalThis ||
-            "SpeechRecognition" in globalThis) {
-            this._recognition = new (globalThis.SpeechRecognition ||
-                globalThis.webkitSpeechRecognition)();
+        if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+            this._recognition = new (window.SpeechRecognition ||
+                window.webkitSpeechRecognition)();
             this._recognition.continuous = true;
             this._recognition.interimResults = true;
             this._recognition.onstart = () => {
@@ -2553,18 +2551,17 @@ class Accessibility {
         }
     }
     textToSpeech(text) {
-        const globalThisAny = globalThis;
-        if (!globalThisAny.SpeechSynthesisUtterance ||
-            !globalThisAny.speechSynthesis)
+        const windowAny = window;
+        if (!windowAny.SpeechSynthesisUtterance || !windowAny.speechSynthesis)
             return;
-        let msg = new globalThisAny.SpeechSynthesisUtterance(text);
+        let msg = new windowAny.SpeechSynthesisUtterance(text);
         msg.lang = this.options.language.textToSpeechLang;
         msg.lang = this.options.textToSpeechLang;
         msg.rate = this._stateValues.speechRate;
         msg.onend = () => {
             this._isReading = false;
         };
-        let voices = globalThisAny.speechSynthesis.getVoices();
+        let voices = windowAny.speechSynthesis.getVoices();
         let isLngSupported = false;
         for (let i = 0; i < voices.length; i++) {
             if (voices[i].lang === msg.lang) {
@@ -2576,12 +2573,11 @@ class Accessibility {
         if (!isLngSupported) {
             this._common.warn("text to speech language not supported!");
         }
-        if (globalThis.speechSynthesis.pending ||
-            globalThis.speechSynthesis.speaking) {
-            globalThis.speechSynthesis.pause;
-            globalThis.speechSynthesis.cancel();
+        if (window.speechSynthesis.pending || window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause;
+            window.speechSynthesis.cancel();
         }
-        globalThis.speechSynthesis.speak(msg);
+        window.speechSynthesis.speak(msg);
         this._isReading = true;
     }
     createScreenShot(url) {
@@ -2619,12 +2615,12 @@ class Accessibility {
         if (typeof this._recognition === "object" &&
             typeof this._recognition.stop === "function")
             this._recognition.stop();
-        this._speechToTextTarget = globalThis.event.target;
+        this._speechToTextTarget = window.event.target;
         this.speechToText();
     }
     read(e) {
         try {
-            e = globalThis.event || e || arguments[0];
+            e = window.event || e || arguments[0];
             if (e && e.preventDefault) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2633,21 +2629,20 @@ class Accessibility {
         catch (ex) { }
         let allContent = Array.prototype.slice.call(document.querySelectorAll("._access-menu *"));
         for (const key in allContent) {
-            if (allContent[key] === globalThis.event.target &&
-                e instanceof MouseEvent)
+            if (allContent[key] === window.event.target && e instanceof MouseEvent)
                 return;
         }
         if (e instanceof KeyboardEvent &&
             ((e.shiftKey && e.key === "Tab") || e.key === "Tab")) {
-            this.textToSpeech(globalThis.event.target.innerText);
+            this.textToSpeech(window.event.target.innerText);
             return;
         }
         if (this._isReading) {
-            globalThis.speechSynthesis.cancel();
+            window.speechSynthesis.cancel();
             this._isReading = false;
         }
         else
-            this.textToSpeech(globalThis.event.target.innerText);
+            this.textToSpeech(window.event.target.innerText);
     }
     runHotkey(name) {
         switch (name) {
@@ -3125,8 +3120,8 @@ class MenuInterface {
                 document.removeEventListener("keyup", this.readBind, false);
                 this._acc.common.deployedObjects.remove("." + className);
             }
-            if (globalThis.speechSynthesis)
-                globalThis.speechSynthesis.cancel();
+            if (window.speechSynthesis)
+                window.speechSynthesis.cancel();
             this._acc.isReading = false;
         };
         if (destroy) {
@@ -3135,7 +3130,7 @@ class MenuInterface {
             step2[0].classList.remove("active");
             step3[0].classList.remove("active");
             this._acc.stateValues.textToSpeech = false;
-            globalThis.speechSynthesis.cancel();
+            window.speechSynthesis.cancel();
             return remove();
         }
         if (this._acc.stateValues.speechRate === 1 &&
@@ -3464,13 +3459,13 @@ __webpack_require__.r(__webpack_exports__);
 class Storage {
     constructor() { }
     has(key) {
-        return globalThis.localStorage.hasOwnProperty(key);
+        return window.localStorage.hasOwnProperty(key);
     }
     set(key, value) {
-        globalThis.localStorage.setItem(key, JSON.stringify(value));
+        window.localStorage.setItem(key, JSON.stringify(value));
     }
     get(key) {
-        let item = globalThis.localStorage.getItem(key);
+        let item = window.localStorage.getItem(key);
         try {
             return JSON.parse(item);
         }
@@ -3479,10 +3474,10 @@ class Storage {
         }
     }
     clear() {
-        globalThis.localStorage.clear();
+        window.localStorage.clear();
     }
     remove(key) {
-        globalThis.localStorage.removeItem(key);
+        window.localStorage.removeItem(key);
     }
     isSupported() {
         let test = "_test";
@@ -3582,8 +3577,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main */ "./main.ts");
 
 
-if (typeof globalThis !== "undefined")
-    globalThis.Accessibility = _main__WEBPACK_IMPORTED_MODULE_0__["default"];
+if (typeof window !== "undefined")
+    window.Accessibility = _main__WEBPACK_IMPORTED_MODULE_0__["default"];
 
 
 })();

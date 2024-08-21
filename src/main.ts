@@ -94,9 +94,9 @@ export class Accessibility implements IAccessibility {
       );
     }
     if (this.options.modules.speechToText) {
-      globalThis.addEventListener("beforeunload", () => {
+      window.addEventListener("beforeunload", () => {
         if (this._isReading) {
-          globalThis.speechSynthesis.cancel();
+          window.speechSynthesis.cancel();
           this._isReading = false;
         }
       });
@@ -314,7 +314,7 @@ export class Accessibility implements IAccessibility {
 
   disabledUnsupportedFeatures() {
     if (
-      !("webkitSpeechRecognition" in globalThis) ||
+      !("webkitSpeechRecognition" in window) ||
       location.protocol !== "https:"
     ) {
       this._common.warn(
@@ -322,11 +322,8 @@ export class Accessibility implements IAccessibility {
       );
       this.options.modules.speechToText = false;
     }
-    const globalThisAny = globalThis as any;
-    if (
-      !globalThisAny.SpeechSynthesisUtterance ||
-      !globalThisAny.speechSynthesis
-    ) {
+    const windowAny = window as any;
+    if (!windowAny.SpeechSynthesisUtterance || !windowAny.speechSynthesis) {
       this._common.warn("text to speech isn't supported in this browser");
       this.options.modules.textToSpeech = false;
     }
@@ -1207,7 +1204,7 @@ export class Accessibility implements IAccessibility {
       closeBtn.addEventListener(
         evt,
         (e: Event | KeyboardEvent) => {
-          let et = e || globalThis.event;
+          let et = e || window.event;
           if (
             (et as KeyboardEvent).detail === 0 &&
             (et as KeyboardEvent).key !== "Enter"
@@ -1224,7 +1221,7 @@ export class Accessibility implements IAccessibility {
       resetBtn.addEventListener(
         evt,
         (e: Event | KeyboardEvent) => {
-          let et = e || globalThis.event;
+          let et = e || window.event;
           if (
             (et as KeyboardEvent).detail === 0 &&
             (et as KeyboardEvent).key !== "Enter"
@@ -1241,7 +1238,7 @@ export class Accessibility implements IAccessibility {
 
   getVoices(): Promise<SpeechSynthesisVoice[]> {
     return new Promise((resolve) => {
-      let synth = globalThis.speechSynthesis;
+      let synth = window.speechSynthesis;
       let id: ReturnType<typeof setInterval>;
 
       id = setInterval(() => {
@@ -1345,7 +1342,7 @@ export class Accessibility implements IAccessibility {
     for (let i = 0; i < lis.length; i++) {
       ["click", "keyup"].forEach((evt) =>
         lis[i].addEventListener(evt, (e: Event | KeyboardEvent) => {
-          let evt = e || globalThis.event;
+          let evt = e || window.event;
           if (
             (evt as KeyboardEvent).detail === 0 &&
             (evt as KeyboardEvent).key !== "Enter"
@@ -1364,7 +1361,7 @@ export class Accessibility implements IAccessibility {
         el.addEventListener(
           "click",
           (e: Event) => {
-            let evt = e || globalThis.event;
+            let evt = e || window.event;
             this.invoke(
               (
                 evt.target as HTMLElement
@@ -1660,12 +1657,9 @@ export class Accessibility implements IAccessibility {
   }
 
   speechToText() {
-    if (
-      "webkitSpeechRecognition" in globalThis ||
-      "SpeechRecognition" in globalThis
-    ) {
-      this._recognition = new ((globalThis as any).SpeechRecognition ||
-        (globalThis as any).webkitSpeechRecognition)();
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      this._recognition = new ((window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition)();
       this._recognition.continuous = true;
       this._recognition.interimResults = true;
       this._recognition.onstart = () => {
@@ -1713,20 +1707,17 @@ export class Accessibility implements IAccessibility {
   }
 
   textToSpeech(text: string) {
-    const globalThisAny = globalThis as any;
-    if (
-      !globalThisAny.SpeechSynthesisUtterance ||
-      !globalThisAny.speechSynthesis
-    )
+    const windowAny = window as any;
+    if (!windowAny.SpeechSynthesisUtterance || !windowAny.speechSynthesis)
       return;
-    let msg = new globalThisAny.SpeechSynthesisUtterance(text);
+    let msg = new windowAny.SpeechSynthesisUtterance(text);
     msg.lang = this.options.language.textToSpeechLang;
     msg.lang = this.options.textToSpeechLang;
     msg.rate = this._stateValues.speechRate;
     msg.onend = () => {
       this._isReading = false;
     };
-    let voices = globalThisAny.speechSynthesis.getVoices();
+    let voices = windowAny.speechSynthesis.getVoices();
     let isLngSupported = false;
     for (let i = 0; i < voices.length; i++) {
       if (voices[i].lang === msg.lang) {
@@ -1738,14 +1729,11 @@ export class Accessibility implements IAccessibility {
     if (!isLngSupported) {
       this._common.warn("text to speech language not supported!");
     }
-    if (
-      globalThis.speechSynthesis.pending ||
-      globalThis.speechSynthesis.speaking
-    ) {
-      globalThis.speechSynthesis.pause;
-      globalThis.speechSynthesis.cancel();
+    if (window.speechSynthesis.pending || window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause;
+      window.speechSynthesis.cancel();
     }
-    globalThis.speechSynthesis.speak(msg);
+    window.speechSynthesis.speak(msg);
     this._isReading = true;
   }
 
@@ -1787,13 +1775,13 @@ export class Accessibility implements IAccessibility {
     )
       this._recognition.stop();
 
-    this._speechToTextTarget = globalThis.event.target as HTMLElement;
+    this._speechToTextTarget = window.event.target as HTMLElement;
     this.speechToText();
   }
 
   read(e: Event) {
     try {
-      e = globalThis.event || e || arguments[0];
+      e = window.event || e || arguments[0];
       if (e && e.preventDefault) {
         e.preventDefault();
         e.stopPropagation();
@@ -1804,24 +1792,20 @@ export class Accessibility implements IAccessibility {
       document.querySelectorAll("._access-menu *")
     );
     for (const key in allContent) {
-      if (
-        allContent[key] === globalThis.event.target &&
-        e instanceof MouseEvent
-      )
+      if (allContent[key] === window.event.target && e instanceof MouseEvent)
         return;
     }
     if (
       e instanceof KeyboardEvent &&
       ((e.shiftKey && e.key === "Tab") || e.key === "Tab")
     ) {
-      this.textToSpeech((globalThis.event.target as HTMLElement).innerText);
+      this.textToSpeech((window.event.target as HTMLElement).innerText);
       return;
     }
     if (this._isReading) {
-      globalThis.speechSynthesis.cancel();
+      window.speechSynthesis.cancel();
       this._isReading = false;
-    } else
-      this.textToSpeech((globalThis.event.target as HTMLElement).innerText);
+    } else this.textToSpeech((window.event.target as HTMLElement).innerText);
   }
 
   runHotkey(name: string) {

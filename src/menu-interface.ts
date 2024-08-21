@@ -322,7 +322,7 @@ export class MenuInterface implements IMenuInterface {
         document.removeEventListener("keyup", this.readBind, false);
         this._acc.common.deployedObjects.remove("." + className);
       }
-      if (globalThis.speechSynthesis) globalThis.speechSynthesis.cancel();
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       this._acc.isReading = false;
     };
 
@@ -332,7 +332,7 @@ export class MenuInterface implements IMenuInterface {
       step2[0].classList.remove("active");
       step3[0].classList.remove("active");
       this._acc.stateValues.textToSpeech = false;
-      globalThis.speechSynthesis.cancel();
+      window.speechSynthesis.cancel();
       return remove();
     }
 
